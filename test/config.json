@@ -1,0 +1,24 @@
+{
+  "mysql": {
+    "host": "211.113.121.182",
+    "port": 3306,
+    "user": "sns",
+    "password": "sns1234",
+    "database": "sns"
+  },
+  "mongo": {
+    "host": "dev.im-in.com",
+    "port": 27317,
+    "user": "",
+    "password": "",
+    "database": "imin2_migration"
+  },
+  "mappings": [
+    {
+      "select": "SELECT idx,CONCAT(category1,category2,category3) code,category1,category2,category3,name,depth,updDate,regDate FROM category c",
+      "collection": "categories2",
+      "template": "categories.json"
+    }
+  ]
+}
+
