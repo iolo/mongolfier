@@ -1,6 +1,6 @@
 {
   "name": "mongolfier",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A Simple MySQL to MongoDB Migration Tool",
   "homepage": "http://github.com/iolo/mongolfier",
   "author": "Dongsu Jang <iolothebard@gmail.com>",
@@ -27,9 +27,13 @@
     "vows":"*",
     "jslint":"*"
   },
+  "directories": {
+    "lib": "./lib",
+    "bin": "./bin"
+  },
   "main": "./lib/mongolfier",
   "bin": {
-    "mongolfier": "./bin/mongolfier"
+    "mongolfier": "./bin/mongolfier.js"
   },
   "scripts":{
       "start": "node ./bin/mongolfier",
