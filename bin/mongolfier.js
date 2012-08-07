@@ -4,42 +4,29 @@
 var mongolfier = require('../lib/mongolfier'),
     _ = require('underscore'),
     fs = require('fs'),
-    OPTIMIST_OPTIONS = {
-      'configfile': { alias: 'f', default: 'config.json' },
-      'logfile': { alias: 'l' },
-      'collection': { alias: 'c' },
-      'emptycollection': { alias: 'E', boolean: true },
-      'failonerror': { alias: 'R', boolean: true },
-      'dryrun': { alias: 'D', boolean: true },
-      'debug': { alias: 'X', boolean: true },
-      'quiet': { alias: 'q', boolean: true },
-      'verbose': { alias: 'v', boolean: true }
+    optimist = require('optimist'),
+    USAGE = 'A Simple MySQL to MongoDB Migration Tool\nUsage: $0 [options]',
+    OPTIONS = {
+      'configfile': { alias: 'f', default: 'config.json', description: 'path to config file' },
+      'logfile': { alias: 'l', description: 'path to log file' },
+      'collection': { alias: 'c', description: 'collection name to migrate' },
+      'emptycollection': { alias: 'E', boolean: true, description: 'make empty collection before migration' },
+      'failonerror': { alias: 'R', boolean: true, description: 'stop at first failure' },
+      'dryrun': { alias: 'D', boolean: true, description: 'do not insert into collection' },
+      'debug': { alias: 'X', boolean: true, description: 'show debug information' },
+      'quiet': { alias: 'q', boolean: true, description: 'be extra quiet' },
+      'verbose': { alias: 'v', boolean: true, description: 'be extra verbose' },
+      'help': { alias: 'h', description: 'show this message' }
     },
-    argv = require('optimist').options(OPTIMIST_OPTIONS).argv,
-    configFile = argv.configfile;
+    argv = optimist.usage(USAGE,OPTIONS).argv;
 
-if (argv.debug) {
-  console.log('argv:', argv);
+if (argv.help) {
+  console.log(optimist.help());
+  process.exit(0);
 }
 
-console.log('mongolfier');
-console.log('load config file:', configFile);
-
-fs.readFile(configFile, 'utf8', function (err, configData) {
-  if (err) {
-    console.log('bad or missing config file:', configFile);
-    process.exit(1);
-  }
-
-  if (argv.debug) {
-    console.log('configData:', configData);
-  }
-
-  var config = _.defaults(JSON.parse(configData), argv);
-
-  if (argv.debug) {
-    console.log('config:', config);
-  }
-
-  mongolfier.migrate(config);
-});
+var configText = fs.readFileSync(argv.configfile, 'utf8');
+var configJson = JSON.parse(configText);
+var config = _.defaults(configJson, argv);
+mongolfier.migrate();
+mongolfier.migrate(config);

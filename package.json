@@ -37,6 +37,7 @@
   },
   "scripts":{
       "start": "node ./bin/mongolfier",
-      "test": "vows --spec --isolate"
+      "test": "./node_modules/.bin/vows --spec --isolate",
+      "pretest": "./node_modules/.bin/jslint bin/*.js lib/*.js"
   }
 }
