@@ -1,33 +1,38 @@
 {
-  "name":"mongolfier",
-  "version":"0.0.1",
-  "description":"mysql to mongodb migration tool",
-  "homepage":"http://github.com/iolo/mongolfier",
-  "author":"Dongsu Jang <iolothebard@gmail.com>",
-  "repository":{
-    "type":"git",
-    "url":"https://github.com/iolo/mongolfier.git"
+  "name": "mongolfier",
+  "version": "0.0.1",
+  "description": "A Simple MySQL to MongoDB Migration Tool",
+  "homepage": "http://github.com/iolo/mongolfier",
+  "author": "Dongsu Jang <iolothebard@gmail.com>",
+  "keywords": [ "mysql", "mongodb", "mongo", "migration" ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iolo/mongolfier.git"
   },
-  "engines":{
-    "node":">0.8"
+  "bugs":{
+    "url": "https://github.com/iolo/mongofier/issues"
   },
-  "dependencies":{
+  "license": "MIT",
+  "engine": {
+    "node": ">=0.8"
+  },
+  "dependencies": {
     "underscore": "1.3.3",
     "mysql": "2.0.0-alpha3",
     "mongodb": "1.1.2",
-    "async": "0.1.22",
-    "nconf": "0.6.4",
     "optimist": "0.3.4",
-    "ejs": "0.8.0"
+    "winston": "0.6.2"
   },
-  "devDependencies":{
+  "devDependencies": {
     "vows":"*",
     "jslint":"*"
   },
-  "optionalDependencies":{},
-  "main": "mongolfier.js",
+  "main": "./lib/mongolfier",
+  "bin": {
+    "mongolfier": "./bin/mongolfier"
+  },
   "scripts":{
-      "start":"node mongolfier.js",
+      "start": "node ./bin/mongolfier",
       "test": "vows --spec --isolate"
   }
 }
