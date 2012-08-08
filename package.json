@@ -1,6 +1,6 @@
 {
   "name": "mongolfier",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A Simple MySQL to MongoDB Migration Tool",
   "homepage": "http://github.com/iolo/mongolfier",
   "author": "Dongsu Jang <iolothebard@gmail.com>",

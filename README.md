@@ -35,6 +35,7 @@ Options:
 --logfile, -l          path to log file                      
 --collection, -c       collection name to migrate            
 --emptycollection, -E  make empty collection before migration  [boolean]
+--bulkcopy, -B         do bulk copy if no template available   [boolean]
 --failonerror, -R      stop at first failure                   [boolean]
 --dryrun, -D           do not insert into collection           [boolean]
 --debug, -X            show debug information                  [boolean]
@@ -48,7 +49,8 @@ configuration
 
 ### config file(json)
 
-NOTE: no comment allowed here. this file should conforms to strict json format.
+* NOTE: no comment allowed here. this file should conforms to *strict* json format.
+* NOTE: <code>{{</code> and <code>}}</code> is just a marker. replace it with yours.
 
 <pre>
 {
@@ -72,6 +74,14 @@ NOTE: no comment allowed here. this file should conforms to strict json format.
     "{{custom_attr_key}}": "{{custom_attr_value}}",
     ...
   },
+  "before": [
+    "{{before_script.js}}",
+    ...
+  ],
+  "after": [
+    "{{after_script.js}}",
+    ...
+  ]
   "collections": [
     {
       "collection": "{{mongo_collection_name}}",
@@ -92,7 +102,17 @@ NOTE: no comment allowed here. this file should conforms to strict json format.
 }
 </pre>
 
+* <code>context</code> is optional. this could be accessed via <code>$</code> variable across processing all collections.
+* <code>before</code> is optional. these scripts are *eval*ulated before processing the first collection.
+* <code>after</code> is optional. these scripts are *eval*ulated after processing the last collection.
+* <code>template</code> is optional(default: <code>{{collection name}}.json</code>).
+* <code>query</code> is string or array. array will be *join*ed to a query.
+
 ### collection template(json)
+
+> NOTE: comment allowed here. this file is javascript or something. ;)
+ 
+> NOTE: <code>{{</code> and <code>}}</code> is just a marker. replace it with yours.
 
 <pre>
 {
@@ -108,7 +128,18 @@ NOTE: no comment allowed here. this file should conforms to strict json format.
 }
 </pre>
 
+* <code>$</code> is shared across processing all collections.
+* use <code>$.MYSQL</code> for [mysql connection](https://github.com/felixge/node-mysql/).
+* use <code>$.MONGO</code> for [mongo connection](http://mongodb.github.com/node-mongodb-native/api-generated/db.html).
+* use <code>_</code> for [underscore.js library](http://underscorejs.org).
+* use <code>$.ObjectID</code> for [mongo ObjectID class](http://mongodb.github.com/node-mongodb-native/api-bson-generated/objectid.html).
+* use <code>$.ROW</code> for the current mysql row as object.
+
 ### advanced collection template with js.
+
+> NOTE: comment allowed here. this file is javascript or something. ;)
+
+> NOTE: <code>{{</code> and <code>}}</code> is just a marker. replace it with yours.
 
 <pre><code>
 var id = new $.ObjectID();
@@ -121,6 +152,9 @@ return {
   ...
 }
 </code></pre>
+
+* <code>$</code> is a shared object across collection processing.
+* return <code>null</code> or *nothing* to skip to mysql row.
 
 TBD... ;)
 
