@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/*jslint node:true, nomen:true, white:true*/
 'use strict';
 
 var mongolfier = require('../lib/mongolfier'),
@@ -13,6 +14,7 @@ var mongolfier = require('../lib/mongolfier'),
       'emptycollection': { alias: 'E', boolean: true, description: 'make empty collection before migration' },
       'failonerror': { alias: 'R', boolean: true, description: 'stop at first failure' },
       'dryrun': { alias: 'D', boolean: true, description: 'do not insert into collection' },
+      'profile': { alias: 'P', boolean: true, description: 'show profile infmation' },
       'debug': { alias: 'X', boolean: true, description: 'show debug information' },
       'quiet': { alias: 'q', boolean: true, description: 'be extra quiet' },
       'verbose': { alias: 'v', boolean: true, description: 'be extra verbose' },
@@ -25,8 +27,9 @@ if (argv.help) {
   process.exit(0);
 }
 
+/*jslint stupid:true*/
 var configText = fs.readFileSync(argv.configfile, 'utf8');
+/*jslint stupid:false*/
 var configJson = JSON.parse(configText);
 var config = _.defaults(configJson, argv);
-mongolfier.migrate();
 mongolfier.migrate(config);
