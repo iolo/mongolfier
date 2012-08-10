@@ -52,7 +52,7 @@ configuration
 * NOTE: no comment allowed here. this file should conforms to *strict* json format.
 * NOTE: <code>{{</code> and <code>}}</code> is just a marker. replace it with yours.
 
-<pre>
+<pre><code>
 {
   "mysql": {
     "host": "{{mysql_host}}",
@@ -100,7 +100,7 @@ configuration
     ...
   ]
 }
-</pre>
+</code></pre>
 
 * <code>context</code> is optional. this could be accessed via <code>$</code> variable across processing all collections.
 * <code>before</code> is optional. these scripts are *eval*ulated before processing the first collection.
@@ -108,53 +108,76 @@ configuration
 * <code>template</code> is optional(default: <code>{{collection name}}.json</code>).
 * <code>query</code> is string or array. array will be *join*ed to a query.
 
-### collection template(json)
+### mapping template/script
 
 > NOTE: comment allowed here. this file is javascript or something. ;)
  
 > NOTE: <code>{{</code> and <code>}}</code> is just a marker. replace it with yours.
 
-<pre>
-{
-  // use mongodb ObjectID
-  "_id": new $.ObjectID(),
-  // use mysql column values
-  "{{mongo_field_name}}": $.{{mysql_column_name}}, // use dot notation
-  "{{mongo_field_name}}": $["{{mysql_column_name}}"], // use association array notation
-  // use custom attrbutes in context(see config file)
-  "{{mongo_field_name}}": $.{{custom_attr_key}}, // use dot notation
-  "{{mongo_field_name}}": $["{{custom_attr_key}}"], // use association array notation
-  ...
-}
-</pre>
-
-* <code>$</code> is shared across processing all collections.
-* use <code>$.MYSQL</code> for [mysql connection](https://github.com/felixge/node-mysql/).
-* use <code>$.MONGO</code> for [mongo connection](http://mongodb.github.com/node-mongodb-native/api-generated/db.html).
-* use <code>_</code> for [underscore.js library](http://underscorejs.org).
-* use <code>$.ObjectID</code> for [mongo ObjectID class](http://mongodb.github.com/node-mongodb-native/api-bson-generated/objectid.html).
-* use <code>$.ROW</code> for the current mysql row as object.
-
-### advanced collection template with js.
-
-> NOTE: comment allowed here. this file is javascript or something. ;)
-
-> NOTE: <code>{{</code> and <code>}}</code> is just a marker. replace it with yours.
+#### simple mapping template
 
 <pre><code>
-var id = new $.ObjectID();
-...
-return {
-  "_id": id,
-  "foo": ($.bar).toUpperCase(),
-  "sum": $.num1 + $.num2,
-  "now": new Date(),
+({
+  // use mongodb ObjectID
+  "_id": new mongo.ObjectID(),
+  // use mysql column values
+  "{{mongo_field_name}}": ${{mysql_column_name}},
   ...
-}
+})
 </code></pre>
 
-* <code>$</code> is a shared object across collection processing.
-* return <code>null</code> or *nothing* to skip to mysql row.
+#### complex mapping template
+
+<pre><code>
+var id = new mono.ObjectID();
+...
+({
+  "_id": id,
+  "foo": ($bar).toUpperCase(),
+  "sum": $num1 + $num2,
+  "now": new Date(),
+  ...
+})
+</code></pre>
+
+* NOTE on the enclosing braces the result. do not use <code>return</code> keyword.
+
+#### async mapping template
+
+<pre><code>
+var d = q.defer();
+var id = new mongo.ObjectID();
+setTimeout(function () {
+  ...
+  d.resolve({
+    "_id": id,
+    "foo": ($bar).toUpperCase(),
+    "sum": $num1 + $num2,
+    "now": new Date(),
+    ...
+  })
+}, 100);
+d.promise;
+</code></pre>
+
+* NOTE on the last line <code>d.promise;</code>. do not use <code>return</code> keyword.
+
+#### predefined objects
+
+* <code>$ROW</code> - the current mysql row as object.
+* <code>$MYSQL</code> - the active [mysql connection](https://github.com/felixge/node-mysql/).
+* <code>$MONGO</code> - the active [mongo connection](http://mongodb.github.com/node-mongodb-native/api-generated/db.html).
+* <code>$CONTEXT</code> - a shared object across all mappings.
+* <code>console</code> - [console object](http://nodejs.org/api/stdio.html)
+* <code>util</code> - [util module](http://nodejs.org/api/util.html)
+* <code>fs</code> - [fs module](http://nodejs.org/api/fs.html)
+* <code>path</code> - [path module](http://nodejs.org/api/path.html)
+* <code>async</code> - [async module](https://github.com/caolan/async/)
+* <code>q</code> - [q module](https://github.com/kriskowal/q/)
+* <code>mongo</code> - [mongo module](http://mongodb.github.com/node-mongodb-native/)
+* <code>mysql</code> - [mysql module](https://github.com/felixge/node-mysql/) (NOTE: 2.x branch!)
+* <code>_</code> - [underscore.js module](http://underscorejs.org).
+* and so on...
 
 TBD... ;)
 
