@@ -11,38 +11,67 @@ install and run
 ---------------
 
 ### local install and run
-<pre>
-npm install mongolfier
-node ./node_modules/.bin/mongolfier -h
-</pre>
+
+```
+$ npm install mongolfier
+$ node ./node_modules/.bin/mongolfier --help
+```
 
 ### global install and run
-<pre>
-npm install -g mongolfier
-mongolfier -h
-</pre>
+
+```
+$ npm install -g mongolfier
+$ mongolfier --help
+```
+
+### simple migration with bulk-copy
+
+To copy all rows from `users` table on `test` mysql database
+into `users` collection on `test` mongo db.
+
+```
+$ mongolfier -s mysql://root@localhost/test -o mongodb://localhost/test -b users
+```
+
+**NOTE** use `-d` flag to test WITHOUT real `insert` operations:
+
+```
+$ mongolfier -s mysql://root@localhost/test -o mongodb://localhost/test -b -d users
+```
+
+**NOTE** use `-e` flag to remove all existing documents in the collection:
+
+```
+$ mongolfier -s mysql://root@localhost/test -o mongodb://localhost/test -b -e users
+```
+
+### complex migration with template(EXPERIMENTAL)
+
+For complex migration,
+you need to write a config file and template files and use `-c` option:
+
+```
+$ mongolfier -c config.json
+```
 
 usage
 -----
 
-<pre>
-$ mongolfier -h
-A Simple MySQL to MongoDB Migration Tool
-Usage: node ./bin/mongolfier.js [options]
+```
+$ mongolfier -help
+  Usage: mongolfier [OPTIONS] [COLLECTION_NAME ...]
 
-Options:
---configfile, -f       path to config file                     [default: "config.json"]
---logfile, -l          path to log file                      
---collection, -c       collection name to migrate            
---emptycollection, -E  make empty collection before migration  [boolean]
---bulkcopy, -B         do bulk copy if no template available   [boolean]
---failonerror, -R      stop at first failure                   [boolean]
---dryrun, -D           do not insert into collection           [boolean]
---debug, -X            show debug information                  [boolean]
---quiet, -q            be extra quiet                          [boolean]
---verbose, -v          be extra verbose                        [boolean]
---help, -h             show this message                     
-</pre>
+  Options:
+
+    -h, --help              output usage information
+    -V, --version           output the version number
+    -c, --config [FILE]     path to config file(js or json)
+    -s, --mysql [URL]       mysql connection url
+    -o, --mongo [URL]       mongodb connection url
+    -e, --empty-collection  make empty collection before migration
+    -b, --bulk-copy         do bulk copy if no template available
+    -d, --dry-run           do not insert into collection
+```
 
 configuration
 -------------
@@ -50,26 +79,12 @@ configuration
 ### config file(json)
 
 * NOTE: no comment allowed here. this file should conforms to *strict* json format.
-* NOTE: <code>{{</code> and <code>}}</code> is just a marker. replace it with yours.
+* NOTE: `{{` and `}}` is just a marker. replace it with yours.
 
-<pre><code>
+```javascript
 {
-  "mysql": {
-    "host": "{{mysql_host}}",
-    "port": {{mysql_port}},
-    "user": "{{mysql_user}}",
-    "password": "{{mysql_password}}",
-    "database": "{{mysql_database}}",
-    ...
-  },
-  "mongo": {
-    "host": "{{mongo_host}}",
-    "port": {{mongo_port}},
-    "user": "{{mongo_user}}",
-    "password": "{{mongo_password}}",
-    "database": "{{mongo_database}}",
-    ...
-  },
+  "mysql": "mysql://user:password@host:port/database",
+  "mongo": "mongodb://user:password@host:port/db",
   "context": {
     "{{custom_attr_key}}": "{{custom_attr_value}}",
     ...
@@ -83,7 +98,7 @@ configuration
     ...
   ]
   "collections": [
-    {
+    "collection{
       "collection": "{{mongo_collection_name}}",
       "template": "{{path_to_collection_template}}",
       "query": "{{mysql_select_query}}"
@@ -100,23 +115,23 @@ configuration
     ...
   ]
 }
-</code></pre>
+```
 
-* <code>context</code> is optional. this could be accessed via <code>$</code> variable across processing all collections.
-* <code>before</code> is optional. these scripts are *eval*ulated before processing the first collection.
-* <code>after</code> is optional. these scripts are *eval*ulated after processing the last collection.
-* <code>template</code> is optional(default: <code>{{collection name}}.json</code>).
-* <code>query</code> is string or array. array will be *join*ed to a query.
+* `context` is optional. this could be accessed via `$` variable across processing all collections.
+* `before` is optional. these scripts are *eval*ulated before processing the first collection.
+* `after` is optional. these scripts are *eval*ulated after processing the last collection.
+* `template` is optional(default: `{{collection name}}.json`).
+* `query` is string or array. array will be *join*ed to a query.
 
 ### mapping template/script
 
 > NOTE: comment allowed here. this file is javascript or something. ;)
  
-> NOTE: <code>{{</code> and <code>}}</code> is just a marker. replace it with yours.
+> NOTE: `{{` and `}}` is just a marker. replace it with yours.
 
 #### simple mapping template
 
-<pre><code>
+```javascript
 ({
   // use mongodb ObjectID
   "_id": new mongo.ObjectID(),
@@ -124,12 +139,12 @@ configuration
   "{{mongo_field_name}}": ${{mysql_column_name}},
   ...
 })
-</code></pre>
+```
 
 #### complex mapping template
 
-<pre><code>
-var id = new mono.ObjectID();
+```javascript
+var id = new mongo.ObjectID();
 ...
 ({
   "_id": id,
@@ -138,13 +153,13 @@ var id = new mono.ObjectID();
   "now": new Date(),
   ...
 })
-</code></pre>
+```
 
-* NOTE on the enclosing braces the result. do not use <code>return</code> keyword.
+* NOTE on the enclosing braces the result. do not use `return` keyword.
 
-#### async mapping template
+#### async mapping template(EXPERIMENTAL)
 
-<pre><code>
+```javascript
 var d = q.defer();
 var id = new mongo.ObjectID();
 setTimeout(function () {
@@ -158,25 +173,25 @@ setTimeout(function () {
   })
 }, 100);
 d.promise;
-</code></pre>
+```
 
-* NOTE on the last line <code>d.promise;</code>. do not use <code>return</code> keyword.
+* NOTE on the last line `d.promise;`. do not use `return` keyword.
 
 #### predefined objects
 
-* <code>$ROW</code> - the current mysql row as object.
-* <code>$MYSQL</code> - the active [mysql connection](https://github.com/felixge/node-mysql/).
-* <code>$MONGO</code> - the active [mongo connection](http://mongodb.github.com/node-mongodb-native/api-generated/db.html).
-* <code>$CONTEXT</code> - a shared object across all mappings.
-* <code>console</code> - [console object](http://nodejs.org/api/stdio.html)
-* <code>util</code> - [util module](http://nodejs.org/api/util.html)
-* <code>fs</code> - [fs module](http://nodejs.org/api/fs.html)
-* <code>path</code> - [path module](http://nodejs.org/api/path.html)
-* <code>async</code> - [async module](https://github.com/caolan/async/)
-* <code>q</code> - [q module](https://github.com/kriskowal/q/)
-* <code>mongo</code> - [mongo module](http://mongodb.github.com/node-mongodb-native/)
-* <code>mysql</code> - [mysql module](https://github.com/felixge/node-mysql/) (NOTE: 2.x branch!)
-* <code>_</code> - [underscore.js module](http://underscorejs.org).
+* `$ROW` - the current mysql row as object.
+* `$COLLECTION` - the current mongo collection as object.
+* `$MYSQL` - the active [mysql connection](https://github.com/felixge/node-mysql/).
+* `$MONGO` - the active [mongo connection](http://mongodb.github.com/node-mongodb-native/api-generated/db.html).
+* `$CONTEXT` - a shared object across all mappings.
+* `mongo` - [mongo module](http://mongodb.github.com/node-mongodb-native/)
+* `mysql` - [mysql module](https://github.com/felixge/node-mysql/)
+* `console` - [console object](http://nodejs.org/api/stdio.html)
+* `util` - [util module](http://nodejs.org/api/util.html)
+* `fs` - [fs module](http://nodejs.org/api/fs.html)
+* `path` - [path module](http://nodejs.org/api/path.html)
+* `Q` - [q module](https://github.com/kriskowal/q/)
+* `_` - [lodash module](http://lodash.com).
 * and so on...
 
 TBD... ;)
