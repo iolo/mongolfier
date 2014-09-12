@@ -1,3 +1,8 @@
+DEPRECATION NOTICE
+==================
+
+This project is abandoned.
+
 mongolfier
 ==========
 
