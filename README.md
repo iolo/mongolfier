@@ -103,7 +103,7 @@ configuration
     ...
   ]
   "collections": [
-    "collection{
+    {
       "collection": "{{mongo_collection_name}}",
       "template": "{{path_to_collection_template}}",
       "query": "{{mysql_select_query}}"
